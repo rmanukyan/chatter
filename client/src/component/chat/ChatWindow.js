@@ -5,7 +5,7 @@ import Message from "./Message";
 import { POST_FILE } from "../../utils/rest.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFileArrowUp,
+  faPaperclip,
 } from "@fortawesome/free-solid-svg-icons";
 
 function ChatWindow(props) {
@@ -117,8 +117,9 @@ function ChatWindow(props) {
       >
         {messages && messages.map((m) => <Message key={m._id} message={m} />)}
       </div>
-      {fileContent !== null ?      <div className="row" >
-        <p>{fileContent.name}</p>
+      {fileContent !== null ?      <div className="row my-1" >
+        <div className="col"> <p>Attachment: {fileContent.name}</p> </div>
+        <div className="col"> <button className="btn btn-danger btn-sm" onClick={() => setFileContent(null)}>cancel</button> </div>
       </div> : null}
 
 
@@ -150,7 +151,7 @@ function ChatWindow(props) {
             onChange={handleFileUpload}
             type="file"
           />
-          <FontAwesomeIcon icon={faFileArrowUp} onClick={onButtonClick} />
+          <FontAwesomeIcon icon={faPaperclip} onClick={onButtonClick} />
         </a>
         <button
           type="button"
