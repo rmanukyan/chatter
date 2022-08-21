@@ -15,6 +15,7 @@ connectDB();
 const chats = require("./routes/chats");
 const auth = require("./routes/auth");
 const profile = require("./routes/profile");
+const transfer = require("./routes/transfers");
 const app = express();
 const port = process.env.PORT;
 app.use("/static", express.static(path.join(__dirname, "files")));
@@ -47,6 +48,7 @@ app.use(cors(corsOptions));
 app.use("/api/v1/chats", chats);
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/profile", profile);
+app.use("/api/v1/transfer", transfer);
 app.use(errorHandler);
 app.use(cookieParser());
 

@@ -1,18 +1,19 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import useWebSocket from "react-use-websocket";
 import { AuthContext } from "../../auth/AuthContext";
 import Message from "./Message";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import {
-//   faPaperclip,
-//   faSmile,
-//   faPaperPlane,
-// } from "@fortawesome/free-solid-svg-icons";
+import { POST_FILE } from "../../utils/rest.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFileArrowUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 function ChatWindow(props) {
   const { session } = useContext(AuthContext);
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState([]);
+  const [fileContent, setFileContent] = useState(null);
+  const inputFile = useRef(null);
   const baseUrl = "http://" + window.location.hostname + ":5000/static/";
   const { sendMessage, lastMessage } = useWebSocket(
     `ws://localhost:5000/ws/${session.token}`
@@ -49,13 +50,41 @@ function ChatWindow(props) {
     }
   }, [lastMessage, setMessages]);
 
-  const execute = () => {
-    if (inputText.length < 1) return;
-    // setMessages([...messages, { msg: inputText, time: "12:00 PM | Aug 13" }]);
+  const handleFileUpload = e => {
+    const { files } = e.target;
+    if (files && files.length) {
+      const filename = files[0].name;
+      console.log("filename", filename); 
+      setFileContent(files[0]);
+    }
+  };
+
+  const onButtonClick = () => {
+    inputFile.current.click();
+  };
+
+  const sendFile = () => {
+    const formData = new FormData();
+    formData.append("file", fileContent);
+    // formData.append("name", fileContent.name);
+
+    POST_FILE("transfer/file", formData, session.token)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+        sendJsonMessage(`<a href=${data.data}`);
+        setFileContent(null);
+      })
+      .catch((error) => {
+        console.error("Error:", error.message);
+      });
+  }
+
+  const sendJsonMessage = (msg) => {
     const data = {
       roomId: props.selectedRoom._id,
       msg: {
-        body: inputText,
+        body: msg,
         date: new Date(),
         userId: session.userId,
         username: session.username,
@@ -63,8 +92,21 @@ function ChatWindow(props) {
     };
     sendMessage(JSON.stringify(data));
     setInputText("");
+  }
+
+  const execute = () => {
+        // sending file
+        if(fileContent !== null) {
+          sendFile();
+        }
+    if (inputText.length < 1) return;
+    // setMessages([...messages, { msg: inputText, time: "12:00 PM | Aug 13" }]);
+    sendJsonMessage(inputText);
+    
+
   };
   console.log("ChatWindow props: ", props);
+  console.log("session: ", session);
   return (
     <div className="col-md-6 col-lg-7 col-xl-8">
       <h2 className="text-muted "> #{props.selectedRoom.name}</h2>
@@ -75,6 +117,10 @@ function ChatWindow(props) {
       >
         {messages && messages.map((m) => <Message key={m._id} message={m} />)}
       </div>
+      {fileContent !== null ?      <div className="row" >
+        <p>{fileContent.name}</p>
+      </div> : null}
+
 
       <div className="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
         <img
@@ -96,9 +142,16 @@ function ChatWindow(props) {
         <a className="ms-3 text-muted" href="#!">
           <FontAwesomeIcon icon={faSmile} />
         </a>
-        <a className="ms-3" href="#!">
-          <FontAwesomeIcon icon={faPaperPlane} />
-        </a> */}
+ */}
+         <a className="ms-3 mx-2" href="#!">
+         <input
+            style={{ display: "none" }}
+            ref={inputFile}
+            onChange={handleFileUpload}
+            type="file"
+          />
+          <FontAwesomeIcon icon={faFileArrowUp} onClick={onButtonClick} />
+        </a>
         <button
           type="button"
           className="btn btn-light btn-lg btn-rounded "
