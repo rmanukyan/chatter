@@ -9,8 +9,10 @@ SMTP_PASSWORD=your_pass
 
 Running Server:
 cd server
+npm install
 node .
 
 Running Client:
 cd client
+npm install
 npm start
