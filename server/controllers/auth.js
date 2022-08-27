@@ -127,7 +127,13 @@ const sendToken = (user, statusCode, res) => {
   if (process.env.NODE_ENV === "production") {
     options.secure = true;
   }
-
+/**
+ * I tried to understand why you set a cookie in the response and I haven't figured it out.
+ * The api, websockets and client authenticate users by token in headers or url(websockets).
+ * But what is the role of cookies in this application?
+ * To me it looks like you tried to implement different strategies for users' authorization/authentication, ended up
+ * with bearer-token-in-headers-based one and forgot to remove the cookies logic...
+ */
   res
     .status(statusCode)
     .cookie("token", token, options)

@@ -10,7 +10,7 @@ module.exports = async (expressServer) => {
   const websocketServer = new WebSocket.Server({
     verifyClient: async (info, done) => {
       logger.info(info.req.url);
-
+// Passing token in url query or headers will be less error prone than a token as a part of path.
       const token = info.req.url.split("/")[2];
       logger.info(`token: ${token}`);
       try {
@@ -51,6 +51,9 @@ module.exports = async (expressServer) => {
             room.save();
 
             // client is the user id here
+
+            /**  On2 complexity ALARM! 🚨
+                I'd map room.participants and identify if clients.has(client)...*/
             [...clients.keys()].forEach((client) => {
               logger.info(`user is : ${client}`);
 
