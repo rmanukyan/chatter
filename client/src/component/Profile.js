@@ -3,6 +3,7 @@ import Navbar from "./navigation/Navbar";
 import { AuthContext } from "../auth/AuthContext";
 import { POST_FILE } from "../utils/rest.js";
 import { formatDateShort } from "../utils/dates.js";
+import { getProfileData as getProfileDataWithAxios } from '../api/index.js';
 
 function Profile(props) {
   const { session } = useContext(AuthContext);
@@ -16,7 +17,7 @@ function Profile(props) {
   useEffect(() => {
     getProfileData();
   }, []);
-
+  //INSTEAD OF THIS ....
   const getProfileData = () => {
     const url = "http://" + window.location.hostname + ":5000/api/v1/profile";
     const bearer = "Bearer " + session.token;
@@ -40,6 +41,30 @@ function Profile(props) {
         console.error("Error:", error.message);
       });
   };
+
+  /** ... you can have this */
+  const getProfileData2 = () => {
+    try {
+      const data = await getProfileDataWithAxios();
+      console.log("Success:", data);
+      setProfile(data.data);
+      let fromStorage = localStorage.getItem("session");
+      fromStorage = JSON.parse(fromStorage);
+      fromStorage.ava = data.data.ava;
+      localStorage.setItem("session", JSON.stringify(session));
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
+
+  /**
+ * Your components cannot know about server api, tokens and bearers;
+ // const url = "http://" + window.location.hostname + ":5000/api/v1/profile";
+ // const bearer = "Bearer " + session.token;
+
+ // Maximum they can do is calling a function from api part of your FE project and pass arguments 
+    to it.
+ */
 
   const fileChangedHandler = (event) => {
     const formData = new FormData();
